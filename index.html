@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+	<link rel="stylesheet" href="./assets/css/reset.css" />
+    <link rel="stylesheet" href="./assets/css/style.css" />
+    <title>Weather Dashboard</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>Weather Dashboard</h1>
+    </header>
+
+    <main>
+      <nav>
+        <form>
+          <label for="city">Search For a City:</label><br>
+          <input type="text" id="city" name="city"><br>
+          <button type="button">Search</button> 
+        </form> 
+        <div id="search-container"></div>
+      </nav>
+
+      <div id="content">
+        <div id="current-weather-container">
+          <p>current weather in nyc is</p>
+        </div>
+
+        <div id="card-container">
+          <h2>5 Day Forecast</h2>
+          <div id="day1" class="day-card"></div>
+          <div id="day2" class="day-card"></div>
+          <div id="day3" class="day-card"></div>
+          <div id="day4" class="day-card"></div>
+          <div id="day5" class="day-card"></div>
+        </div>
+      </div>
+    </main>
+	<script src="./assets/js/apikey.js"></script>
+    <script src="./assets/js/script.js"></script>
+  </body>
+</html>
