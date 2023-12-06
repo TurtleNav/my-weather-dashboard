@@ -44,8 +44,26 @@ main {
     text-align: left;
 }
 
+#card-container {
+    align-items: stretch;
+    display: flex;
+    justify-content: space-around;
+}
 
+#card-container .day-card {
+    flex: 1;
+    background-color: aqua;
+    border: solid black 1px;
 
+    div {
+        text-align: left;
+    }
+
+    h2 {
+        font-size: 24px;
+        margin-bottom: 24px;
+    }
+}
 
 /*
 @media (min-width: 600px) {

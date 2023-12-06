@@ -1,51 +1,15 @@
-const lat = "40.78";
-const lon = "-73.88";
-var queryURL = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
-const baseURL = "http://api.openweathermap.org/data/2.5/weather";
-
-
 var currentWeatherEl = document.getElementById("current-weather");
+var forecastEl = document.getElementById("card-container");
+
+const units = "imperial";
+const unitSuffix = "°F";
 
 
-// console.log(fetch(queryURL);
-
-var units = {
-    standard: "standard",
-    metric: "metric",
-    imperial: "imperial"
+function urlByCoords(lat, lon) {
+    return `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`;
 }
-
-const unitSuffix = {
-    standard: "K",
-    metric: "°C",
-    imperial: "°F"
-}
-
-
-var baseUnits = Object();
-function setBaseUnit(unit) {
-    switch (unit) {
-        case units.metric:
-            baseUnits.units = units.metric;
-            baseUnits.unitSuffix = unitSuffix.metric;
-            break;
-        case units.imperial:
-            baseUnits.units = units.imperial;
-            baseUnits.unitSuffix = unitSuffix.imperial;
-            break;
-        default:
-            baseUnits.units = units.standard;
-            baseUnits.unitSuffix = unitSuffix.standard;
-    }
-}
-
-setBaseUnit(units.imperial);
-
-function constructQueryByCoords(lat, lon) {
-    return `${baseURL}?lat=${lat}&lon=${lon}&units=${baseUnits.units}&appid=${API_KEY}`;
-}
-function constructQuery(city) {
-    return `${baseURL}?q=${city}&units=${baseUnits.units}&appid=${API_KEY}`;  
+function urlByCity(city) {
+    return `https://api.openweathermap.org/geo/1.0/direct?q=${city}&units=${units}&appid=${API_KEY}`;  
 }
 
 function saveQuery(key, queryJSON) {
@@ -59,33 +23,119 @@ function loadCachedQuery(key) {
     return JSON.parse(localStorage.getItem(key));
 }
 
-
 function getIconURL(iconString) {
     return `https://openweathermap.org/img/wn/${iconString}2x.png`
 }
 
-
-
-function renderCurrentWeather(city, data, units) {
+function renderCurrentWeather(city, data) {
     document.getElementById("current-weather").innerHTML = `
         <h2>${city} (${dayjs.unix(data.dt).format("dddd - MM/DD/YYYY")})</h2>
         <p>
-            Current Temperature: ${data.main.temp}${[unitSuffix[units]]}
+            Current Temperature: ${data.main.temp}${unitSuffix}
         </p>
         <p>
-            High Temperature: ${data.main.temp_max}${[unitSuffix[units]]}
+            High Temperature: ${data.main.temp_max}${unitSuffix}
         </p>
         <p>
-            Low Temperature: ${data.main.temp_min}${[unitSuffix[units]]}
+            Low Temperature: ${data.main.temp_min}${unitSuffix}
         </p>
         <p>
             Humidity: ${data.main.humidity}%
         </p>
-        ${data.next_update}
-
         `
         ;
 }
+
+function renderFiveDayForecast(data) {
+    console.log(data.list);
+    var days = [];
+
+    // These three variables are a running average of the forecast
+    // weather conditions at each 3 hour interval
+    var tempAvg = 0;
+    var windAvg = 0;
+    var humidityAvg = 0;
+    var date;
+
+    for (let day=0; day<5; day++) {
+        
+        for (let n=0; n<8; n++) {
+            var d = data.list[8*day + n];
+            date = dayjs(d.dt_txt.split(' ')[0]).format('MM/DD/YYYY');
+            tempAvg += d.main.temp;
+            windAvg += d.wind.speed;
+            humidityAvg += d.main.humidity;
+        }
+        tempAvg /= 8;
+        windAvg /= 8;
+        humidityAvg /= 8;
+
+        document.getElementById(`day${day+1}`).innerHTML = `
+        <h2>(${date})</h2>
+        <div>
+            <p>Temp: ${tempAvg.toFixed(2)} ${unitSuffix}</p>
+            <p>Wind: ${windAvg.toFixed(2)} mph</p>
+            <p>Humidity: ${humidityAvg.toFixed(0)} %</p>
+        </div>
+        `;
+    }
+
+
+
+    /*
+    for (let i=1; i<data.list.length+1; i++) {
+        var d = data.list[i-1];
+        var date = dayjs(d.dt_txt.split(' ')[0]).format('MM/DD/YYYY');
+        if (!days.includes(date)) {
+            console.log("avg temp = ", tempAvg);
+            days.push(date);
+            tempAvg = d.main.temp;
+            windAvg = d.wind.spped;
+            humidityAvg = d.main.humidity;
+        } else {
+            //tempAvg = (((i%8 + 1) * tempAvg) + d.main.temp) / ((i%8)+2);
+            console.log(i);
+        }
+    }
+    console.log("days = ", days);
+    */
+}
+
+
+function renderWeatherAPI(city) {
+    fetch(urlByCity(city)).then(function(response) {
+        if (response.ok) {
+            response.json().then(function(data) {
+                var lat = data[0].lat;
+                var lon = data[0].lon;
+                console.log(`The city: ${city} was found at ${lat} latitude and ${lon} longitude`);
+                fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`).then(function(response) {
+                    if (response.ok) {
+                        response.json().then(function(data) {
+                            renderCurrentWeather(city, data);
+                        });
+                    }
+                });
+
+
+                fetch(urlByCoords(lat, lon)).then(function(response) {
+                    if (response.ok) {
+                        response.json().then(function(data) {
+                            console.log(`Data has been loaded from the API for ${city}`);
+                            renderFiveDayForecast(data);
+                        });
+                    }
+                });
+            });
+        }
+    });
+}
+
+function renderWeatherCache(city) {
+    renderCurrentWeather(city, localStorage.getItem(city));
+}
+
+
 
 // Helper function for determining if a cached query is >1hr old and therefore
 // the API has since replaced the cached data. If the cached query is younger than
@@ -102,34 +152,45 @@ function loadCachedQueries() {
     }
 }
 
-function queryAPI(city) {
-    fetch(constructQuery(city)).then(function(response) {
-        if (response.ok) {
-            response.json().then(function(data) {
-                console.log("Data has been loaded from the API");
-                localStorage.setItem(city, JSON.stringify(data));
-            });
-        }
-    });
-}
+
+
+
 
 
 function getData(city) {
     city = city.toLowerCase().trim();
+    console.log(`Attempting to fetch data for the city of ${city}`);
     if (!Object.hasOwn(queryCache, city)) {
-        queryAPI();
+        console.log(`The city of ${city} does not have data in the cache.`)
+        queryAPI(city);
     } else {
-        console.log("Data is being loaded from the cache");
+        console.log(`Data for ${city} is already cached. Attempting to use cached data`);
     }
-    var queryData = JSON.parse(localStorage.getItem(city));
-
-
-
+    let cityData = localStorage.getItem(city);
+    console.log(cityData);
+    let queryData = JSON.parse();
+    console.log(queryData.dt);
+    if (isTimeToRefresh(queryData.dt)) {
+        console.log("The data appears to be old")
+    }
 }
-loadCachedQueries();
-getData("Chicago");
+
+renderWeatherAPI("chicago");
+// loadCachedQueries();
+//console.log(queryAPI(`http://api.openweathermap.org/geo/1.0/direct?q=chicago&limit=1&appid=${API_KEY}`));
+
 /*
-queryAPI(constructQueryByCoords(lat, lon));
-var cityname = "nyc"
-renderCurrentWeather(cityname, loadCachedQuery(cityname), "imperial");
+    var coords = getCoords(city);
+    console.log(coords);
+    var lat = coords[0];
+    var lon = coords[1];
+    console.log(`lat = ${lat}`);
+    console.log(`lon = ${lon}`);
+    var queryCoordsURL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+    return fetch(queryCoordsURL).then(function(response) {
+        return response.json().then(function(data) {
+            console.log(`Data has been loaded from the API for ${city}`);
+            return data;
+        });
+    });
 */
