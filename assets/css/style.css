@@ -2,52 +2,75 @@
     --default-border: 5px;
 }
 
-
 header {
     background-color: blue;
     color: white;
 	font-size: 24px;
     text-align: center;
 	height: 100px;
-    margin-bottom: 20px
+    margin-bottom: 20px;
 }
 
 header h1 {
 	padding: 40px;
 }
 
-main {
-    display: flex;
-    flex-wrap: wrap;
-}
-
 nav,
-#current-weather-container,
-#card-container {
-    height: 400px;
+#current-weather,
+#forecast {
     border-style: solid;
     border-color: blue;
     border-width: var(--default-border);
-    width: calc(100vw - 2*var(--default-border));
+    flex: 1;
+    text-align: center;
 }
-
 
 nav {
-    order: 1;
+    flex: 0.5;
+    height: 80vh;
 }
-#current-weather-container {
-    order: 0;
+
+main {
+    display: flex;
+}
+
+#content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+#forecast h3 {
+    text-align: left;
 }
 
 
+
+
+/*
 @media (min-width: 600px) {
-    #content {
+    main {
+        align-items: stretch;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+    }
+    #content {
         flex: 1;
     }
     nav {
         order: 0;
     }
 
-}
+    /*
+    #content {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+    }
+    nav {
+        order: 0;
+    }
+*/
+
+
+

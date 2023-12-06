@@ -26,16 +26,17 @@
           <input type="text" id="city" name="city"><br>
           <button type="button">Search</button> 
         </form> 
+        <hr class="solid">
         <div id="search-container"></div>
       </nav>
 
       <div id="content">
-        <div id="current-weather-container">
-          <p>current weather in nyc is</p>
+        <div id="current-weather">
+          <p>Current weather in nyc is &#8593 </p>
         </div>
 
-        <div id="card-container">
-          <h2>5 Day Forecast</h2>
+        <div id="forecast">
+          <h3>5 Day Forecast:</h3>
           <div id="day1" class="day-card"></div>
           <div id="day2" class="day-card"></div>
           <div id="day3" class="day-card"></div>
@@ -44,7 +45,12 @@
         </div>
       </div>
     </main>
-	<script src="./assets/js/apikey.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/dayjs@1.11.3/dayjs.min.js"
+      integrity="sha256-iu/zLUB+QgISXBLCW/mcDi/rnf4m4uEDO0wauy76x7U="
+      crossorigin="anonymous"
+    ></script>
+	  <script src="./assets/js/apikey.js"></script>
     <script src="./assets/js/script.js"></script>
   </body>
 </html>
