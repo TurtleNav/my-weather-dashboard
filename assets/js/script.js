@@ -24,24 +24,34 @@ function loadCachedQuery(key) {
 }
 
 function getIconURL(iconString) {
-    return `https://openweathermap.org/img/wn/${iconString}2x.png`
+    return `https://openweathermap.org/img/wn/${iconString}@2x.png`
+}
+
+function capitalizeString(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function renderCurrentWeather(city, data) {
+    console.log("icon: ", data);
     document.getElementById("current-weather").innerHTML = `
-        <h2>${city} (${dayjs.unix(data.dt).format("dddd - MM/DD/YYYY")})</h2>
-        <p>
-            Current Temperature: ${data.main.temp}${unitSuffix}
-        </p>
-        <p>
-            High Temperature: ${data.main.temp_max}${unitSuffix}
-        </p>
-        <p>
-            Low Temperature: ${data.main.temp_min}${unitSuffix}
-        </p>
-        <p>
-            Humidity: ${data.main.humidity}%
-        </p>
+        <div id="text">
+            <h2>${capitalizeString(city)} (${dayjs.unix(data.dt).format("dddd - MM/DD/YYYY")})</h2>
+            <p>
+                Current Temperature: ${data.main.temp}${unitSuffix}
+            </p>
+            <p>
+                High Temperature: ${data.main.temp_max}${unitSuffix}
+            </p>
+            <p>
+                Low Temperature: ${data.main.temp_min}${unitSuffix}
+            </p>
+            <p>
+                Humidity: ${data.main.humidity}%
+            </p>
+        </div>
+        <div id="image">
+            <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" width=100 height=100>
+        </div>
         `
         ;
 }
@@ -76,6 +86,9 @@ function renderFiveDayForecast(data) {
             <p>Temp: ${tempAvg.toFixed(2)} ${unitSuffix}</p>
             <p>Wind: ${windAvg.toFixed(2)} mph</p>
             <p>Humidity: ${humidityAvg.toFixed(0)} %</p>
+        </div>
+        <div>
+            <img src="${getIconURL(d.weather[0].icon)}" width=100 height=100>
         </div>
         `;
     }
